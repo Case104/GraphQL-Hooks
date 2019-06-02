@@ -1,0 +1,7 @@
+{
+    "env": {
+        "MONGO_USER": "adminjc",
+        "MONGO_PASSWORD": "Pa55word",
+        "MONGO_DB": "events-test-db"
+    }
+}
