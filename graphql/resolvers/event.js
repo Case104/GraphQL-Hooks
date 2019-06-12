@@ -6,26 +6,27 @@ module.exports = {
     events: async () => { 
         try {            
             const events = await Event.find()
-            return events.map(event => {
-                return formatEvent(event);
-            });
+            return events.map(formatEvent);
         } catch(err){ 
             throw err;
         }
     },
-    createEvent: async args => {
+    createEvent: async ({ eventInput: { title, description, price, date }}, req) => {
+        if (!req.isAuth){
+            throw new Error('Unauthenticated user')
+        }
         const event = new Event({
-            title: args.eventInput.title,
-            description: args.eventInput.description,
-            price: +args.eventInput.price,
-            date: new Date(args.eventInput.date),
-            creator: "sthing"
+            title,
+            description,
+            price: +price,
+            date: new Date(date),
+            creator: req.userId
         });
         let createdEvent;
         try {
             const savedEventResult = await event.save();
             createdEvent = formatEvent(savedEventResult);
-            const creator = await User.findById('');
+            const creator = await User.findById(req.userId);
             if (!creator){
                 throw new Error(`User not found.`);
             }

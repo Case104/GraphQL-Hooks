@@ -15,12 +15,12 @@ export const formatEvent = event => {
 
 export const formatBooking = booking => {
     return {
-        ...savedBooking._doc,
-        _id: savedBooking.id,
+        ...booking._doc,
+        _id: booking.id,
         user: user.bind(this, booking._doc.user),
         event: singleEvent.bind(this, booking._doc.event),                
-        createdAt: formatReadableDate(savedBooking._doc.createdAt),
-        updatedAt: formatReadableDate(savedBooking._doc.updatedAt)
+        createdAt: formatReadableDate(booking._doc.createdAt),
+        updatedAt: formatReadableDate(booking._doc.updatedAt)
     };
 };
 
@@ -48,9 +48,7 @@ const singleEvent = async eventId => {
 const events = async eventIds => {
     try {
         const events = await Event.find({_id: {$in: eventIds}})
-        return events.map(event => {
-            return formatEvent(event);
-        })        
+        return events.map(formatEvent);
     } catch(err) {
         throw err;
     }

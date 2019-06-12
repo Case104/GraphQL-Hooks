@@ -3,33 +3,40 @@ const Booking = require('../../models/booking');
 const Event = require('../../models/event');
 
 module.exports = {
-    bookings: async () => {
+    bookings: async (_, req) => {
+        if (!req.isAuth){
+            throw new Error('Unauthenticated user')
+        }
         try {
-            const bookings = await Booking.find()
-            return bookings.map(booking => {
-                return formatBooking(booking)
-            });
+            const bookings = await Booking.find();
+            return bookings.map(formatBooking);
         } catch(err) {
             throw err;
         }
     },
-    bookEvent: async args => {
+    bookEvent: async ({ eventId }, req) => {
+        if (!req.isAuth){
+            throw new Error('Unauthenticated user')
+        }
         try {
-            const bookEvent = Event.findOne({_id: args.eventId});
-            const newBooking = new Booking({
-                event: bookEvent,
-                user: 'giggleshits'
+            const event = Event.findOne({ _id: eventId });
+            const booking = new Booking({
+                event,
+                user: req.userId
             });
-            return formatBooking(await newBooking.save());
+            return formatBooking(await booking.save());
         } catch(err){ 
             throw err;
         }
     },
-    cancelBooking: async args => {
+    cancelBooking: async ({ bookingId }, req) => {
+        if (!req.isAuth){
+            throw new Error('Unauthenticated user')
+        }
         try {
-            const currentBooking = await Booking.findById(args.bookingId).populate(event);
-            const currentEvent = formatEvent(currentBooking.event);
-            await Booking.deleteOne({_id: args.bookingId})
+            const booking = await Booking.findById(bookingId).populate(event);
+            const currentEvent = formatEvent(booking.event);
+            await Booking.deleteOne({ _id: bookingId });
             return currentEvent;
         } catch(err){
             throw err;
