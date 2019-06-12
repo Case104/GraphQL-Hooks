@@ -1,0 +1,1 @@
+exports.formatReadableDate = date => new Date(date).toISOString();
