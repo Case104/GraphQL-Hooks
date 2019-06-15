@@ -4,7 +4,7 @@ const User = require('../../models/user');
 const Event = require('../../models/event');
 
 
-export const formatEvent = event => {
+exports.formatEvent = event => {
     return { 
         ...event._doc, 
         _id: event.id, 
@@ -13,7 +13,7 @@ export const formatEvent = event => {
     };
 };
 
-export const formatBooking = booking => {
+exports.formatBooking = booking => {
     return {
         ...booking._doc,
         _id: booking.id,
