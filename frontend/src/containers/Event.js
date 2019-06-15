@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-
+import AuthContext from '../context/auth-context';
 import Modal from '../components/Modal/Modal';
+import CreateEventForm from '../components/Modal/CreateEventForm/CreateEventForm';
 import Backdrop from '../components/Backdrop/Backdrop';
 import EventList from '../components/Events/EventList/EventList';
 import Loading from '../components/Loading/Loading';
-
+import api from '../utils/api';
 import './Event.css'
-import AuthContext from '../context/auth-context';
 
 class EventContainer extends Component {
     constructor(props){
@@ -49,19 +49,8 @@ class EventContainer extends Component {
                 }
             `
         }
-        return fetch('http://localhost:8000/graphql', {
-            method: 'POST',
-            body: JSON.stringify(requestBody),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => {
-            if (res.status !== 200 && res.status !== 201){
-                throw new Error('Query failed');
-            }
-            return res.json();
-        })
+
+        return api.makeRequest(requestBody)
         .then(resJSON => {
             const { events } = resJSON.data;
             this.setState({ events, isLoading: false });
@@ -111,22 +100,7 @@ class EventContainer extends Component {
             `
         }
 
-        const token = this.context.token;
-
-        fetch('http://localhost:8000/graphql', {
-            method: 'POST',
-            body: JSON.stringify(requestBody),
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then(res => {
-            if (res.status !== 200 && res.status !== 201){
-                throw new Error('Mutation failed');
-            }
-            return res.json();
-        })
+        return api.makeRequest(requestBody, this.context.token)
         .then(resJSON => {
             const { _id, title, description, date, price } = resJSON.data.createEvent;
             this.setState(prevState => {
@@ -179,24 +153,13 @@ class EventContainer extends Component {
                         onConfirm={this.handleModalConfirm}
                         confirmText="Confirm"
                     >
-                        <form onSubmit={this.onConfirm}>
-                            <div className='form-control'>
-                                <label htmlFor='title'>Title: </label>
-                                <input type='text' id='title' ref={this.titleElement}/>
-                            </div>
-                            <div className='form-control'>
-                                <label htmlFor='price'>Price:</label>
-                                <input type='number' id='price'ref={this.priceElement}/>
-                            </div> 
-                            <div className='form-control'>
-                                <label htmlFor='date'>Date:</label>
-                                <input type='datetime-local' id='date' ref={this.dateElement}/>
-                            </div>                                                            
-                            <div className='form-control'>
-                                <label htmlFor='description'>Description:</label>
-                                <textarea id='description' rows='4' ref={this.descriptionElement}/>
-                            </div>                       
-                        </form>
+                        <CreateEventForm 
+                            titleRef={this.titleElement}
+                            priceRef={this.priceElement}
+                            dateRef={this.dateElement}
+                            descriptionRef={this.descriptionElement}
+                            onConfirm={this.onConfirm}
+                        />
                     </Modal>
                 )}
                 { this.state.selectedEvent && (
