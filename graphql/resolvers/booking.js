@@ -2,13 +2,14 @@ const { formatBooking, formatEvent } = require('./helpers');
 const Booking = require('../../models/booking');
 const Event = require('../../models/event');
 
+
 module.exports = {
     bookings: async (_, req) => {
         if (!req.isAuth){
             throw new Error('Unauthenticated user')
         }
         try {
-            const bookings = await Booking.find();
+            const bookings = await Booking.find({user: req.userId});
             return bookings.map(formatBooking);
         } catch(err) {
             throw err;
@@ -19,7 +20,7 @@ module.exports = {
             throw new Error('Unauthenticated user')
         }
         try {
-            const event = Event.findOne({ _id: eventId });
+            const event = await Event.findOne({ _id: eventId });
             const booking = new Booking({
                 event,
                 user: req.userId
@@ -29,7 +30,7 @@ module.exports = {
             throw err;
         }
     },
-    cancelBooking: async ({ bookingId }, req) => {
+    cancelBooking: async (bookingId, req) => {
         if (!req.isAuth){
             throw new Error('Unauthenticated user')
         }

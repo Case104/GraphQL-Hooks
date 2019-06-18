@@ -23,6 +23,7 @@ class EventContainer extends Component {
         isLoading: false,
         selectedEvent: null
     }
+    isActive = true;
 
     static contextType = AuthContext;
 
@@ -53,19 +54,23 @@ class EventContainer extends Component {
         return api.makeRequest(requestBody)
         .then(resJSON => {
             const { events } = resJSON.data;
-            this.setState({ events, isLoading: false });
+            if (this.isActive){
+                this.setState({ events, isLoading: false });
+            }
         })
         .catch(err => {
             console.log(err);
-            this.setState({ isLoading: false });
+            if (this.isActive) {
+                this.setState({ isLoading: false });
+            }            
         });
     }
 
-    handleModalLaunch = () => {
+    showEventModal = () => {
         this.setState({ creating: true });
     }
 
-    handleModalConfirm = (event) => {
+    handleCreateEvent = (event) => {
         this.setState({ creating: false });
         const title = this.titleElement.current.value;
         const price = +this.priceElement.current.value; 
@@ -83,12 +88,12 @@ class EventContainer extends Component {
 
         const requestBody = {
             query: `
-                mutation {
+                mutation CreateEvent($title: String!, $description: String!, $price: Float!, $date: String!) {
                     createEvent(eventInput: {
-                        title: "${title}", 
-                        description: "${description}", 
-                        price: ${price},
-                        date: "${date}"
+                        title: $title, 
+                        description: $description, 
+                        price: $price,
+                        date: $date
                     }) {
                         _id
                         title
@@ -97,26 +102,30 @@ class EventContainer extends Component {
                         price
                     }
                 }
-            `
-        }
+            `,
+            variables: {
+                title,
+                description,
+                price,
+                date
+            }
+        };
 
         return api.makeRequest(requestBody, this.context.token)
         .then(resJSON => {
             const { _id, title, description, date, price } = resJSON.data.createEvent;
             this.setState(prevState => {
                 return { 
-                    events: [...prevState.events, 
-                        { 
-                            _id, 
-                            title, 
-                            description, 
-                            date, 
-                            price,
-                            creator: {
-                                _id: this.context.userId
-                            }
+                    events: [...prevState.events, { 
+                        _id, 
+                        title, 
+                        description, 
+                        date, 
+                        price,
+                        creator: {
+                            _id: this.context.userId
                         }
-                    ] 
+                    }]
                 }
             });
         })
@@ -137,7 +146,36 @@ class EventContainer extends Component {
     }
 
     handleBookEvent = () => {
+        if  (!this.context.token) {
+            this.setState({ selectedEvent: null });
+            return;
+        };
+        const requestBody = {
+            query: `
+                mutation BookEvent($id: ID!) {
+                    bookEvent(eventId: $id) {
+                        _id
+                        createdAt
+                        updatedAt
+                    }
+                }
+            `,
+            variables: {
+                id: this.state.selectedEvent._id
+            }
+        };
 
+        return api.makeRequest(requestBody, this.context.token)
+        .then(resJSON => {
+            this.setState({ selectedEvent: null });
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }
+
+    componentWillUnmount(){
+        this.isActive = false;
     }
 
     render() {
@@ -150,8 +188,8 @@ class EventContainer extends Component {
                         canCancel 
                         canConfirm 
                         onCancel={this.handleModalCancel} 
-                        onConfirm={this.handleModalConfirm}
-                        confirmText="Confirm"
+                        onConfirm={this.handleCreateEvent}
+                        confirmText='Confirm'
                     >
                         <CreateEventForm 
                             titleRef={this.titleElement}
@@ -169,7 +207,7 @@ class EventContainer extends Component {
                         canConfirm 
                         onCancel={this.handleModalCancel} 
                         onConfirm={this.handleBookEvent}
-                        confirmText='Book'
+                        confirmText={this.context.token ? 'Book' : 'Confirm'}
                     >
                        <h1>{ this.state.selectedEvent.title }</h1>
                        <h2>
@@ -181,7 +219,7 @@ class EventContainer extends Component {
                 { this.context.token && (
                     <div className='events-control'>
                         <p>Create a new event!</p>
-                        <button className='btn' onClick={this.handleModalLaunch}>Create Event</button>
+                        <button className='btn' onClick={this.showEventModal}>Create Event</button>
                     </div>
                 )}
                 { this.state.isLoading ? 
