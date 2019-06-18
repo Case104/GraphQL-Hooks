@@ -34,7 +34,6 @@ module.exports = {
             await creator.save();
             return createdEvent;
         } catch(err) { 
-            console.log("Error in createEvent:", error);
             throw err;
         }
     }
