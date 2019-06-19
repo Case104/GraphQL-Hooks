@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import AuthContext from '../context/auth-context';
-import Modal from '../components/Modal/Modal';
-import CreateEventForm from '../components/Modal/CreateEventForm/CreateEventForm';
+import AuthContext from '../../context/auth-context';
+import Modal from '../../components/Modal/Modal';
+import CreateEventForm from '../../components/CreateEventForm/CreateEventForm';
 import Backdrop from '../components/Backdrop/Backdrop';
 import EventList from '../components/Events/EventList/EventList';
-import Loading from '../components/Loading/Loading';
-import api from '../utils/api';
+import Loading from '../../components/Loading/Loading';
+import api from '../../utils/api';
 import './Event.css'
 
 class EventContainer extends Component {

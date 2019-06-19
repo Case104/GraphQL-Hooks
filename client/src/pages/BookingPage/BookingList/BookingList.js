@@ -1,5 +1,5 @@
 import React from 'react';
-import BookingItem from './BookingItem/BookingItem';
+import BookingItem from '../BookingItem/BookingItem';
 import './BookingList.css';
 
 const BookingList = (props) => (

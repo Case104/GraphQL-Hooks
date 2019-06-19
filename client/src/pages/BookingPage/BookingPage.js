@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import AuthContext from '../context/auth-context';
+import AuthContext from '../../context/auth-context';
 import BookingList from '../components/Bookings/BookingList/BookingList'
-import  Loading from '../components/Loading/Loading';
-import api from '../utils/api'
+import  Loading from '../../components/Loading/Loading';
+import api from '../../utils/api'
 
 
 class BookingContainer extends Component {

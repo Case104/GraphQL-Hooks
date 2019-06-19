@@ -1,22 +1,18 @@
-import React, { Component } from 'react';
-import AuthContext from '../context/auth-context';
-
+import React, { useState } from 'react';
+import AuthContext from '../../context/auth-context';
 import './Auth.css';
 
-class AuthContainer extends Component {
-    state = {
-        isLogin: true
-    }
+const AuthPage = () => {
+    [isLogin, setIsLogin] = useState(true);
 
     static contextType = AuthContext;
 
-    constructor(props){
-        super(props);
-        this.emailElement = React.createRef();
-        this.passwordElement = React.createRef();
-    }
+    const emailElement = React.createRef();
+    const passwordElement = React.createRef();
 
     handleSwitch = () => {
+        setIsLogin(!isLogin);
+
         this.setState(prevState => {
             return { isLogin: !prevState.isLogin }
         })
@@ -24,8 +20,8 @@ class AuthContainer extends Component {
 
     handleSubmit = (event) => {
         event.preventDefault();
-        const email = this.emailElement.current.value;
-        const password = this.passwordElement.current.value;
+        const email = emailElement.current.value;
+        const password = passwordElement.current.value;
 
         if (email.trim().length === 0 || password.trim().length === 0 ){
             return;
